@@ -12,36 +12,38 @@ import java.util.Map;
  */
 @Data
 public class R {
-
     //是否成功
     private Boolean success;
     //返回消息
     private String message;
+    //错误码
+    private String code;
     //返回数据
     public Map<String, Object> data = new HashMap<>();
 
-    // 把构造方法私有化
-    public R() {}
-
-    // 成功静态方法
-    public static R ok() {
-        R r = new R();
-        r.setSuccess(true);
-        r.setMessage("成功");
-        return r;
+    // 成功
+    public R ok() {
+        this.setSuccess(true);
+        this.setMessage("成功");
+        return this;
     }
 
-    // 失败静态方法
-    public static R error() {
-        R r = new R();
-        r.setSuccess(false);
-        r.setMessage("失败");
-        return r;
+    //设置错误码
+    public R setCode(String code){
+        this.code = code;
+        return this;
     }
 
-    // 消息
-    public R setMsg(String message){
-        this.setMessage(message);
+    // 失败方法
+    public  R error(String mag) {
+        this.setSuccess(false);
+        this.setMessage(mag);
+        return this;
+    }
+
+    public  R error() {
+        this.setSuccess(false);
+        this.setMessage("失败");
         return this;
     }
 

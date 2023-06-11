@@ -38,24 +38,16 @@ public class UserController {
         return userService.register(registerParam);
     }
 
-    // 获取主页信息--get
-
-    @PostMapping("registerManager")
-    @PassToken
-    public R registerManager(@RequestBody RegisterManagerParam registerManagerParam)
-    {
-        return  userService.registerManager(registerManagerParam);
-    }
-    @GetMapping("managerHomePage")
-    @UserLoginToken
-    public R managerHomePage(@RequestAttribute(value="id") String id)
-    {
-        return userService.managerHomePage(id);
-    }
-    @GetMapping("userHomePage")
-    @UserLoginToken
-    public R userHomePage(@RequestAttribute(value="id") String id)
-    {
-        return  userService.userHomePage(id);
-    }
+/**
+ * 以下为鉴权和使用发送请求的用户id示例
+ * @UserLoginToken：需要鉴权
+ * @RequestAttribute(value="id") String id ：用于获取用户id，其中id的命名可变
+ * @PassToken：不需要鉴权
+ */
+//    @GetMapping("managerHomePage")
+//    @UserLoginToken
+//    public R managerHomePage(@RequestAttribute(value="id") String id)
+//    {
+//        return userService.managerHomePage(id);
+//    }
 }
