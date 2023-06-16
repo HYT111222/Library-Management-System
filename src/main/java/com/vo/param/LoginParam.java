@@ -12,5 +12,4 @@ public class LoginParam {
 
     private String userid;
 
-
 }
