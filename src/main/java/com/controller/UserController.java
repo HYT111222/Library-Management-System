@@ -44,10 +44,12 @@ public class UserController {
  * @RequestAttribute(value="id") String id ：用于获取用户id，其中id的命名可变
  * @PassToken：不需要鉴权
  */
-//    @GetMapping("managerHomePage")
-//    @UserLoginToken
-//    public R managerHomePage(@RequestAttribute(value="id") String id)
-//    {
-//        return userService.managerHomePage(id);
-//    }
+    @GetMapping("managerHomePage")
+    @UserLoginToken
+    public R managerHomePage(@RequestAttribute(value="id") String id)
+    {
+        System.out.println(id);
+        R r= new R();
+        return r.ok();
+    }
 }

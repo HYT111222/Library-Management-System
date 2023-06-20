@@ -15,4 +15,11 @@ public class User {
   private String userid;
   private String password;
   private String salt;
+
+  public String getToken(User user) {
+    String token="";
+    token= JWT.create().withAudience(user.getUserid())
+            .sign(Algorithm.HMAC256(user.getPassword()+user.getSalt()));
+    return token;
+  }
 }

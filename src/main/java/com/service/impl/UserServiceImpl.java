@@ -26,12 +26,10 @@ import com.util.md5;
  * Date: 2023/04/13
  */
 @Service
-//@Transactional
 @AllArgsConstructor
 public class UserServiceImpl  extends ServiceImpl<UserMapper, User> implements UserService {
     @Autowired
     private final UserMapper userMapper;
-
 
     /**
      *
@@ -48,6 +46,8 @@ public class UserServiceImpl  extends ServiceImpl<UserMapper, User> implements U
            String salt = user.getSalt();
            String afterMd5 = md5.code(loginParam.getPassword(),salt);
            if (Objects.equals(afterMd5, user.getPassword())) {
+               String token =user.getToken(user);
+               r.data("token",token);
                return r.ok();
            } else {
               return r.error("密码错误");
