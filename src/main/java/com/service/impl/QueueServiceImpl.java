@@ -28,6 +28,7 @@ import com.vo.param.*;
 
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,7 @@ import java.util.function.Function;
 public class QueueServiceImpl extends ServiceImpl<QueueMapper, Queue> implements QueueService {
     @Autowired
     private final QueueMapper queueMapper;
+    private final BookSearchLinkMapper bookSearchLinkMapper;
 
     @Override
     public R queryQueue(CallnumPram callNumber) {
@@ -45,10 +47,35 @@ public class QueueServiceImpl extends ServiceImpl<QueueMapper, Queue> implements
         R r = new R();
         // 查询
         QueryWrapper<Queue> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("booksearchid",callNumber);
+        queryWrapper.eq("queueid",callNumber);
+        List<Queue> que =new ArrayList<>();
+        que=queueMapper.selectList(queryWrapper);
         Queue queue = queueMapper.selectOne(queryWrapper);
+        int flag1=0,flag2=0,flag3=0;//判断排队位置
+        for(int i=0;i<que.size();i++){
+            if(que.get(i).getQueuestate()==1){
+                flag1=1;}
+            if(que.get(i).getQueuestate()==0){
+                flag2=1;}
+            if(que.get(i).getQueuestate()==-1){
+                flag3=1;}
+        }
+
         r.data("data",queue);
         System.out.println("success");
+
+        for(int i=0;i<que.size();i++){
+            if(que.get(i).getQueuestate()==0){
+                que.get(i).setQueuestate()==-1;
+            }
+        }
+        if(flag2==0){
+            for(int i=0;i<que.size();i++){
+                if(que.get(i).getQueuestate()==1){
+                    que.get(i).setQueuestate()==0;
+                }
+            }
+        }
         return r.ok();
     }
 
@@ -58,16 +85,17 @@ public class QueueServiceImpl extends ServiceImpl<QueueMapper, Queue> implements
         System.out.println("加入队伍");
         R r = new R();
         QueryWrapper<Queue> queryWrapper = new QueryWrapper<>();
+        Queue que=new Queue();
         queryWrapper.orderByDesc("queueid");
-        Queue queue = queueMapper.selectOne(queryWrapper);
+        que = queueMapper.selectOne(queryWrapper);
         int lastqueueid= queue.getQueueid();
         int queueid=lastqueueid+1;
-        queue.setQueueid(queueid);
-        queue.setUserid(userid);
-        queue.setBookid(bookid);
-        queue.setQueuestate(0);
-        queueMapper.insert(queue);
-        r.data("data",queue);
+        que.setQueueid(queueid);
+        que.setUserid(userid);
+        que.setBookid(bookid);
+        que.setQueuestate(1);
+        queueMapper.insert(que);
+        r.data("data",que);
         System.out.println("success");
         return r.ok();
     }
