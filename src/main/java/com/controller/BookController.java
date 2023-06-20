@@ -31,7 +31,7 @@ public class BookController {
 //    public R checkBookDetail(@RequestAttribute(value="id") String id,@RequestParam("bookSearchId") String bookSearchId){
         System.out.println("用户id是:" + id);
         System.out.println("接收到的BookID是:" + bookSearchId);
-        return bookService.checkBookDetail();
+        return bookService.checkBookDetail(bookSearchId);
 //        R r = new R();
 //        return r.ok();
     }

@@ -97,9 +97,6 @@ public class UserServiceImpl  extends ServiceImpl<UserMapper, User> implements U
         }
     }
 
-
-
-
     @Override
     public User findUserById(String id) {
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
@@ -107,6 +104,4 @@ public class UserServiceImpl  extends ServiceImpl<UserMapper, User> implements U
         User user = userMapper.selectOne(queryWrapper);
         return user;
     }
-
-
 }

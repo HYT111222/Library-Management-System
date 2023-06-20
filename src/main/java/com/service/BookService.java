@@ -10,7 +10,7 @@ public interface BookService extends IService<Book> {
     R getAllBookList();
 
     // 图书详情查看
-    R checkBookDetail();
+    R checkBookDetail(String bookSearchId);
 
     // 借阅图书
     R borrow(BorrowParam borrowParam);

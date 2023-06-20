@@ -16,10 +16,9 @@ public class LibraryController {
     @GetMapping("checkLibraryInfo/{libraryId}")
     @UserLoginToken
     public R checkLibraryInfo(@RequestAttribute(value="id") String id, @PathVariable("libraryId") String libraryId){
-        return libraryInfoService.checkLibraryInfo();
+        System.out.println("图书馆id： " + libraryId);
+        return libraryInfoService.checkLibraryInfo(libraryId);
     }
-
-
 
 }
 
