@@ -4,15 +4,21 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.entity.Book;
 import com.entity.BookSearchLink;
+import com.entity.Borrow;
 import com.mapper.BookMapper;
 import com.mapper.BookSearchLinkMapper;
+import com.mapper.BorrowMapper;
 import com.service.BookService;
 import com.vo.R;
 import com.vo.param.BorrowParam;
 import lombok.AllArgsConstructor;
+import net.sf.jsqlparser.expression.DateTimeLiteralExpression;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
@@ -23,6 +29,9 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
     private final BookMapper bookMapper;
     @Autowired
     private final BookSearchLinkMapper bookSearchLinkMapper;
+
+    @Autowired
+    private final BorrowMapper borrowMapper;
 
     // 获取所有图书列表
     @Override
@@ -96,7 +105,6 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
         else if(booksearchlink.getBookstate() == "已预约"){
             return r.error("该书籍已被预约");
         }
-
         // 根据bookSearchId找到该类书并将可借阅数量减1
         QueryWrapper<Book> queryWrapper1 = new QueryWrapper<>();
         queryWrapper1.eq("booksearchid",booksearchlink.getBooksearchid());
@@ -106,12 +114,16 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
         }
         int num = book.getBookremainder() - 1;
         book.setBookremainder(num);
-        // 将该记录写入user借阅记录中
-
+        // 将该记录写入borrow表中
+        Borrow borrow = new Borrow();
+        borrow.setUserid(borrowParam.getUserId());
+        borrow.setBookid(borrowParam.getBookId());
+        Date date = new Date();
+        Timestamp timestamp = new Timestamp(date.getTime());
+        borrow.setLoantime(timestamp);
         // 修改该书状态为已经借出
         booksearchlink.setBookstate("已借出");
         r.data("booksearchid",booksearchlink.getBooksearchid());
-
         System.out.println("借阅图书执行完毕。");
         return r;
     }
