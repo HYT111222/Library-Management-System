@@ -1,5 +1,6 @@
 package com.entity;
 
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -7,6 +8,7 @@ import javax.persistence.Id;
 
 @Getter
 @Setter
+@TableName("booksearchlink")
 public class BookSearchLink {
     @Id
     private String bookid;
