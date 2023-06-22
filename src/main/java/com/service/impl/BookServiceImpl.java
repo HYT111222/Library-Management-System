@@ -2,22 +2,22 @@ package com.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.entity.Appointment;
 import com.entity.Book;
-import com.entity.BookSearchLink;
+import com.entity.Booksearchlink;
 import com.entity.Borrow;
+import com.mapper.AppointmentMapper;
 import com.mapper.BookMapper;
-import com.mapper.BookSearchLinkMapper;
+import com.mapper.BooksearchlinkMapper;
 import com.mapper.BorrowMapper;
 import com.service.BookService;
 import com.vo.R;
 import com.vo.param.BorrowParam;
 import lombok.AllArgsConstructor;
-import net.sf.jsqlparser.expression.DateTimeLiteralExpression;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -28,10 +28,13 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
     @Autowired
     private final BookMapper bookMapper;
     @Autowired
-    private final BookSearchLinkMapper bookSearchLinkMapper;
+    private final BooksearchlinkMapper bookSearchLinkMapper;
 
     @Autowired
     private final BorrowMapper borrowMapper;
+
+    @Autowired
+    private final AppointmentMapper appointmentMapper;
 
     // 获取所有图书列表
     @Override
@@ -96,19 +99,28 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
         System.out.println("借阅图书开始执行");
         R r = new R();
         // 根据bookid 获取对应的bookstate
-        QueryWrapper<BookSearchLink> queryWrapper = new QueryWrapper<>();
+        QueryWrapper<Booksearchlink> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("bookid",borrowParam.getBookId());
-        BookSearchLink booksearchlink = bookSearchLinkMapper.selectOne(queryWrapper);
+        Booksearchlink booksearchlink = bookSearchLinkMapper.selectOne(queryWrapper);
         if(booksearchlink.getBookstate() == "已借出"){
             return r.error("该书籍已被借出");
         }
         else if(booksearchlink.getBookstate() == "已预约"){
-            return r.error("该书籍已被预约");
+            // 看是不是预约人
+            QueryWrapper<Appointment> queryWrapper1 = new QueryWrapper<>();
+            queryWrapper1.eq("bookid",borrowParam.getBookId());
+            queryWrapper1.eq("userid",borrowParam.getUserId());
+            Appointment appointment = appointmentMapper.selectOne(queryWrapper1);
+            if(appointment == null){
+                return r.error("该书籍已被他人预约");
+            }
+            System.out.println("appointment: " + appointment);
+            appointment.setAppointstate("预约结束");
         }
         // 根据bookSearchId找到该类书并将可借阅数量减1
-        QueryWrapper<Book> queryWrapper1 = new QueryWrapper<>();
-        queryWrapper1.eq("booksearchid",booksearchlink.getBooksearchid());
-        Book book = bookMapper.selectOne(queryWrapper1);
+        QueryWrapper<Book> queryWrapper2 = new QueryWrapper<>();
+        queryWrapper2.eq("booksearchid",booksearchlink.getBooksearchid());
+        Book book = bookMapper.selectOne(queryWrapper2);
         if(book.getBookremainder()==0){
             return r.error("书籍剩余数量为0。但在bookSearchLink表中显示为空闲。请进行数据库检查。");
         }
@@ -118,13 +130,20 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
         Borrow borrow = new Borrow();
         borrow.setUserid(borrowParam.getUserId());
         borrow.setBookid(borrowParam.getBookId());
-        Date date = new Date();
-        Timestamp timestamp = new Timestamp(date.getTime());
-        borrow.setLoantime(timestamp);
+        String lonatime = getStringDate();
+        borrow.setLoantime(lonatime);
+        System.out.println("LoanTime:" + lonatime);
         // 修改该书状态为已经借出
         booksearchlink.setBookstate("已借出");
         r.data("booksearchid",booksearchlink.getBooksearchid());
         System.out.println("借阅图书执行完毕。");
         return r;
+    }
+
+    private String getStringDate(){
+        Date currentTime = new Date();
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String dateString = formatter.format(currentTime);
+        return dateString;
     }
 }
