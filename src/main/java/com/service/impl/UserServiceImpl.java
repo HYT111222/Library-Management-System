@@ -97,7 +97,21 @@ public class UserServiceImpl  extends ServiceImpl<UserMapper, User> implements U
         }
     }
 
-
+    @Override
+    public  R modifyPassword(String newpassword,String id){
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("userid", id);
+        R r = new R();
+        User user = userMapper.selectById(id);
+        if (user == null) {
+            r.error("用户不存在");
+            return r;
+        }
+        String md5_password = md5.code(newpassword,user.getSalt());
+        userMapper.updatePassword(md5_password,id);
+        r.ok();
+        return r;
+    }
 
 
     @Override

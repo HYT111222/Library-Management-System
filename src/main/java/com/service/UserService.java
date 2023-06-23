@@ -14,6 +14,8 @@ public interface UserService extends IService<User> {
 
     R register(RegisterParam registerParam);
 
+    R modifyPassword(String newpassword,String id);
+
     User findUserById(String id);
 
 }
