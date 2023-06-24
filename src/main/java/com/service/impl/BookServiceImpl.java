@@ -170,8 +170,9 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
         System.out.println(returnBookParam.getBookid());
         System.out.println(returnBookParam.getEvaluateText());
         System.out.println(returnBookParam.getScore());
-        if(returnBookParam.getBookid() == "")
+        if(returnBookParam.getBookid() == ""){
             return r.error("404","记录不存在");
+        }
         Date date = new Date();
         SimpleDateFormat dateFormat= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String returnTime = dateFormat.format(date);//开始时间
@@ -203,11 +204,11 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
 
 
             // 寻找对应书籍的索书号
-            QueryWrapper<BookSearchLink> queryWrapper2 = new QueryWrapper<>();
+            QueryWrapper<Booksearchlink> queryWrapper2 = new QueryWrapper<>();
             queryWrapper2.eq("bookid",returnBookParam.getBookid());
-            BookSearchLink bookSearchLink = bookSearchLinkMapper.selectOne(queryWrapper2);
+            Booksearchlink bookSearchLink = bookSearchLinkMapper.selectOne(queryWrapper2);
             // 更改书籍状态
-            UpdateWrapper<BookSearchLink> updateWrapper1 = new UpdateWrapper<>();
+            UpdateWrapper<Booksearchlink> updateWrapper1 = new UpdateWrapper<>();
             updateWrapper1.set("bookstate","空闲");
             updateWrapper1.eq("bookid",returnBookParam.getBookid());
             if(bookSearchLinkMapper.update(null,updateWrapper1)==0){
@@ -231,8 +232,9 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
     @Override
     public R searchBookList(String searchItem,String itemInfo){
         R r=new R();
-        if(searchItem == null || itemInfo == null)
+        if(searchItem == null || itemInfo == null){
             return r.error("404","缺少搜索信息");
+        }
         QueryWrapper<Book> queryWrapper = new QueryWrapper<>();
         if(searchItem.equals("author")){
             queryWrapper.eq("author",itemInfo);
@@ -254,10 +256,10 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
     public R getBookComment(String bookSearchId){
         R r = new R();
         // 获取对应索书号的藏书号
-        QueryWrapper<BookSearchLink> queryWrapper = new QueryWrapper<>();
+        QueryWrapper<Booksearchlink> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("booksearchid",bookSearchId);
         queryWrapper.select("bookid");
-        List<BookSearchLink> bookids = bookSearchLinkMapper.selectList(queryWrapper);
+        List<Booksearchlink> bookids = bookSearchLinkMapper.selectList(queryWrapper);
         if(bookids.size()==0)
             return r.error("404","图书不存在");
         // 查找评论

@@ -5,10 +5,10 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.entity.Appointment;
 
-import com.entity.BookSearchLink;
+import com.entity.Booksearchlink;
 import com.mapper.AppointMapper;
 
-import com.mapper.BookSearchLinkMapper;
+import com.mapper.BooksearchlinkMapper;
 import com.service.Appointservice;
 
 import com.vo.R;
@@ -27,7 +27,7 @@ public class AppointServiceImpl extends ServiceImpl<AppointMapper, Appointment> 
     @Autowired
     private final AppointMapper appointMapper;
     @Autowired
-    private final BookSearchLinkMapper bookSearchLinkMapper;
+    private final BooksearchlinkMapper booksearchlinkMapper;
     @Override
     public R appointList(String id){
         System.out.println("获取当前预约列表信息开始执行");
@@ -62,11 +62,11 @@ public class AppointServiceImpl extends ServiceImpl<AppointMapper, Appointment> 
         System.out.println("获取当前预约信息开始执行");
         R r = new R();
         r.data("success",false);
-        QueryWrapper<BookSearchLink> queryWrapper = new QueryWrapper<>();
+        QueryWrapper<Booksearchlink> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("booksearchid", appointParam.getCallNumber());
-        List<BookSearchLink> list= bookSearchLinkMapper.selectList(queryWrapper);
+        List<Booksearchlink> list= booksearchlinkMapper.selectList(queryWrapper);
         String bookID = "";
-        for (BookSearchLink bookSearchLink : list) {
+        for (Booksearchlink bookSearchLink : list) {
             if(bookSearchLink.getBookstate()=="空闲"){
                 bookID = bookSearchLink.getBookid();
                break;
@@ -74,7 +74,7 @@ public class AppointServiceImpl extends ServiceImpl<AppointMapper, Appointment> 
         }
         if(bookID!=""){
             // 更改书籍状态
-            UpdateWrapper<BookSearchLink> updateWrapper1 = new UpdateWrapper<>();
+            UpdateWrapper<Booksearchlink> updateWrapper1 = new UpdateWrapper<>();
             updateWrapper1.set("bookstate","已预约");
             updateWrapper1.eq("bookid",bookID);
             //写入预约表
@@ -105,13 +105,13 @@ public class AppointServiceImpl extends ServiceImpl<AppointMapper, Appointment> 
         R r = new R();
         r.data("success",false);
         List<Map<String, Object>> appointList = new ArrayList<>();
-        QueryWrapper<BookSearchLink> queryWrapper = new QueryWrapper<>();
+        QueryWrapper<Booksearchlink> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("booksearchid", booksearchId);
-        List<BookSearchLink> list= bookSearchLinkMapper.selectList(queryWrapper);
+        List<Booksearchlink> list= booksearchlinkMapper.selectList(queryWrapper);
         if(list.size()>0){
             r.data("success",true);
         };
-        for (BookSearchLink bookSearchLink : list) {
+        for (Booksearchlink bookSearchLink : list) {
             Map<String, Object> map = new HashMap<>();
             map.put("bookid", bookSearchLink.getBookid());
             map.put("appointstate", bookSearchLink.getBookstate());
