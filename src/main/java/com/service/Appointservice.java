@@ -6,5 +6,6 @@ import com.vo.param.AppointParam;
 public interface Appointservice {
     R appointList(String id);
     R appoint(String id,AppointParam appointParam);
+    R appointBookList(String booksearchId);
 
 }

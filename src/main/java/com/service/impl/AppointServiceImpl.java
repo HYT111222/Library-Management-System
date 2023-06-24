@@ -99,4 +99,29 @@ public class AppointServiceImpl extends ServiceImpl<AppointMapper, Appointment> 
         return r.ok();
     }
 
+    @Override
+    public R appointBookList(String booksearchId){
+        System.out.println("获取当前预约信息开始执行");
+        R r = new R();
+        r.data("success",false);
+        List<Map<String, Object>> appointList = new ArrayList<>();
+        QueryWrapper<BookSearchLink> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("booksearchid", booksearchId);
+        List<BookSearchLink> list= bookSearchLinkMapper.selectList(queryWrapper);
+        if(list.size()>0){
+            r.data("success",true);
+        };
+        for (BookSearchLink bookSearchLink : list) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("bookid", bookSearchLink.getBookid());
+            map.put("appointstate", bookSearchLink.getBookstate());
+
+            appointList.add(map);
+        }
+
+        r.data("appointlist", appointList);
+        System.out.println(r);
+        return r.ok();
+    }
+
 }

@@ -21,10 +21,20 @@ public class AppointController {
         System.out.println("成功进入查看当前用户预约信息界面");
         return appointService.appointList(id);
     }
+    //为当前用户预约想要的图书
     @PostMapping("appoint")
     @UserLoginToken
     public R appoint(@RequestAttribute(value="id") String id,@RequestBody AppointParam appointParam) {
         return appointService.appoint(id,appointParam);
     }
+
+    //查看当前书籍预约情况
+    @GetMapping("appointBookList")
+    @PassToken
+    public R appointBookList( @RequestParam("booksearchId") String booksearchId){
+        System.out.println("成功进入查看当前用户预约信息界面");
+        return appointService.appointBookList(booksearchId);
+    }
+
 
 }
