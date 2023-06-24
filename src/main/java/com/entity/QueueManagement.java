@@ -5,9 +5,12 @@ import lombok.Setter;
 
 import javax.persistence.Id;
 
+/**
+ * @author hushuo
+ */
 @Getter
 @Setter
-public class Queue {
+public class QueueManagement {
     @Id
     public int queueid;
     public String booksearchid;

@@ -20,7 +20,6 @@ import lombok.AllArgsConstructor;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import sun.misc.Queue;
 import com.service.QueueService;
 import com.entity.*;
 import com.mapper.*;
@@ -36,7 +35,7 @@ import java.util.function.Function;
 
 @Service
 @AllArgsConstructor
-public class QueueServiceImpl extends ServiceImpl<QueueMapper, Queue> implements QueueService {
+public class QueueServiceImpl extends ServiceImpl<QueueMapper, QueueManagement> implements QueueService {
     @Autowired
     private final QueueMapper queueMapper;
     private final BookSearchLinkMapper bookSearchLinkMapper;
@@ -46,11 +45,11 @@ public class QueueServiceImpl extends ServiceImpl<QueueMapper, Queue> implements
         System.out.println("查看排队信息开始执行");
         R r = new R();
         // 查询
-        QueryWrapper<Queue> queryWrapper = new QueryWrapper<>();
+        QueryWrapper<QueueManagement> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("queueid",callNumber);
-        List<Queue> que =new ArrayList<>();
+        List<QueueManagement> que =new ArrayList<>();
         que=queueMapper.selectList(queryWrapper);
-        Queue queue = queueMapper.selectOne(queryWrapper);
+        QueueManagement queue = queueMapper.selectOne(queryWrapper);
         int flag1=0,flag2=0,flag3=0;//判断排队位置
         for(int i=0;i<que.size();i++){
             if(que.get(i).getQueuestate()==1){
@@ -66,13 +65,13 @@ public class QueueServiceImpl extends ServiceImpl<QueueMapper, Queue> implements
 
         for(int i=0;i<que.size();i++){
             if(que.get(i).getQueuestate()==0){
-                que.get(i).setQueuestate()==-1;
+                que.get(i).setQueuestate(-1);
             }
         }
         if(flag2==0){
             for(int i=0;i<que.size();i++){
                 if(que.get(i).getQueuestate()==1){
-                    que.get(i).setQueuestate()==0;
+                    que.get(i).setQueuestate(0);
                 }
             }
         }
@@ -84,15 +83,16 @@ public class QueueServiceImpl extends ServiceImpl<QueueMapper, Queue> implements
         String userID=userid;
         System.out.println("加入队伍");
         R r = new R();
-        QueryWrapper<Queue> queryWrapper = new QueryWrapper<>();
-        Queue que=new Queue();
+        QueryWrapper<QueueManagement> queryWrapper = new QueryWrapper<>();
+        QueueManagement que=new QueueManagement();
+        User user=new User();
         queryWrapper.orderByDesc("queueid");
         que = queueMapper.selectOne(queryWrapper);
-        int lastqueueid= queue.getQueueid();
+        int lastqueueid= que.getQueueid();
         int queueid=lastqueueid+1;
         que.setQueueid(queueid);
         que.setUserid(userid);
-        que.setBookid(bookid);
+        que.setBooksearchid(bookid);
         que.setQueuestate(1);
         queueMapper.insert(que);
         r.data("data",que);
