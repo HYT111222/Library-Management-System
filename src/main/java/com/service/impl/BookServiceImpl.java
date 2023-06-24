@@ -75,9 +75,10 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
         }
         r.data("bookList",bookList);
         if(bookList.isEmpty()){
-            return r.error("图书列表为空！");
+            return r.error("500","图书列表为空！");
         }
         System.out.println("获取所有图书列表执行完毕");
+        r.setCode("200");
         return r.ok();
     }
 
@@ -91,21 +92,10 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
         queryWrapper.eq("booksearchid",bookSearchId);
         // 返回
         Book book = bookMapper.selectOne(queryWrapper);
-//        Map<String,Object> map = new HashMap<>();
-//        map.put("bookSearchId",book.getBooksearchid());
-//        map.put("author",book.getAuthor());
-//        map.put("bookName",book.getBookname());
-//        map.put("press",book.getPress());
-//        map.put("language",book.getLanguage());
-//        map.put("abstract",book.getContentabstract());
-//        map.put("averageScore",book.getAveragescore());
-//        map.put("regionName",book.getRegionname());
-//        map.put("pageNumber",book.getPagenumber());
-//        map.put("bookNumber",book.getBooknumber());
-//        map.put("bookAllowrance",book.getBookremainder());
         r.data("bookInfo",book);
         System.out.println("Book: "+String.valueOf(book));
         System.out.println("图书详情查看执行完毕");
+        r.setCode("200");
         return r.ok();
     }
 
@@ -119,7 +109,7 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
         queryWrapper.eq("bookid",borrowParam.getBookId());
         Booksearchlink booksearchlink = bookSearchLinkMapper.selectOne(queryWrapper);
         if(booksearchlink.getBookstate() == "已借出"){
-            return r.error("该书籍已被借出");
+            return r.error("601","该书籍已被借出");
         }
         else if(booksearchlink.getBookstate() == "已预约"){
             // 看是不是预约人
@@ -128,7 +118,7 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
             queryWrapper1.eq("userid",borrowParam.getUserId());
             Appointment appointment = appointmentMapper.selectOne(queryWrapper1);
             if(appointment == null){
-                return r.error("该书籍已被他人预约");
+                return r.error("601","该书籍已被他人预约");
             }
             System.out.println("appointment: " + appointment);
             appointment.setAppointstate("预约结束");
@@ -153,7 +143,8 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
         booksearchlink.setBookstate("已借出");
         r.data("booksearchid",booksearchlink.getBooksearchid());
         System.out.println("借阅图书执行完毕。");
-        return r;
+        r.setCode("201");
+        return r.ok();
     }
 
     // 获取当前时间
