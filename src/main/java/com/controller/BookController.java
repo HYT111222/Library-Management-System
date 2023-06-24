@@ -5,6 +5,7 @@ import com.annotation.UserLoginToken;
 import com.service.BookService;
 import com.vo.R;
 import com.vo.param.BorrowParam;
+import com.vo.param.ReturnBookParam;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RestController;
@@ -40,6 +41,39 @@ public class BookController {
     @PassToken
     public R borrow(@RequestBody BorrowParam borrowParam) {
         return bookService.borrow(borrowParam);
+    }
+
+    @PutMapping("return")
+    @UserLoginToken
+    public R returnBook(@RequestBody ReturnBookParam returnBookParam) {
+        return bookService.returnBook(returnBookParam);
+    }
+
+    // 获取所有图书列表
+    @GetMapping("/search/{searchItem}/{itemInfo}")
+    @UserLoginToken
+    public R searchBookList(@PathVariable(value="searchItem") String searchItem ,@PathVariable(value="itemInfo") String itemInfo) {
+        return bookService.searchBookList(searchItem,itemInfo);
+    }
+
+
+    //wxy
+    @GetMapping("/getBookComment/{bookSearchId}")
+    @UserLoginToken
+    public R getBookComment(@PathVariable(value="bookSearchId") String bookSearchId){
+        return bookService.getBookComment(bookSearchId);
+    }
+
+    @GetMapping("/getBorrow")
+    @UserLoginToken
+    public R getBorrow(@RequestAttribute(value="id") String id){
+        return bookService.getBorrow(id);
+    }
+
+    @GetMapping("/getBorrowHis")
+    @UserLoginToken
+    public R getBorrowHis(@RequestAttribute(value="id") String id){
+        return bookService.getBorrowHis(id);
     }
 
 

@@ -40,6 +40,12 @@ public class R {
         this.setMessage(mag);
         return this;
     }
+    public  R error(String code,String mag) {
+        this.setSuccess(false);
+        this.setMessage(mag);
+        this.setCode(code);
+        return this;
+    }
 
     public  R error() {
         this.setSuccess(false);
