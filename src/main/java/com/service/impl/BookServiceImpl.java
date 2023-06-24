@@ -1,6 +1,7 @@
 package com.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.entity.Appointment;
 import com.entity.Book;
@@ -13,14 +14,29 @@ import com.mapper.BorrowMapper;
 import com.service.BookService;
 import com.vo.R;
 import com.vo.param.BorrowParam;
+import com.vo.param.ReturnBookParam;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.Random;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
+import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import com.auth0.jwt.JWT;
+import java.sql.Timestamp;
+import com.entity.*;
+import com.mapper.*;
+import com.service.BookService;
+import com.service.UserService;
+import com.vo.R;
+import com.vo.param.*;
+import lombok.AllArgsConstructor;
 @Service
 @AllArgsConstructor
 public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements BookService {
@@ -146,5 +162,132 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String dateString = formatter.format(currentTime);
         return dateString;
+    }
+
+    @Override
+    public R returnBook(ReturnBookParam returnBookParam){
+        R r = new R();
+        System.out.println(returnBookParam.getBookid());
+        System.out.println(returnBookParam.getEvaluateText());
+        System.out.println(returnBookParam.getScore());
+        if(returnBookParam.getBookid() == "")
+            return r.error("404","记录不存在");
+        Date date = new Date();
+        SimpleDateFormat dateFormat= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String returnTime = dateFormat.format(date);//开始时间
+        QueryWrapper<Borrow> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("bookid",returnBookParam.getBookid());
+        queryWrapper.isNull("returntime");
+        if(borrowMapper.exists(queryWrapper)){
+            // 更新借阅表的信息
+            UpdateWrapper<Borrow> updateWrapper = new UpdateWrapper<>();
+            updateWrapper.set("returntime",returnTime);
+            updateWrapper.set("score",returnBookParam.getScore());
+            updateWrapper.set("evaluatetext",returnBookParam.getEvaluateText());
+            updateWrapper.eq("bookid",returnBookParam.getBookid());
+            updateWrapper.isNull("returntime");
+            if(borrowMapper.update(null, updateWrapper)==0){
+                return r.error("503","unknown error01" );
+            }
+
+            // 获取当前书籍的均分
+            QueryWrapper<Borrow> queryWrapper1 = new QueryWrapper<>();
+            queryWrapper1.eq("bookid",returnBookParam.getBookid());
+            queryWrapper1.select("score");
+            List<Borrow> borrows = borrowMapper.selectList(queryWrapper1);
+            float score = 0;
+            for(int i = 0; i<borrows.size();i++){
+                score = score + borrows.get(i).getScore();
+            }
+            score = score/borrows.size();
+
+
+            // 寻找对应书籍的索书号
+            QueryWrapper<BookSearchLink> queryWrapper2 = new QueryWrapper<>();
+            queryWrapper2.eq("bookid",returnBookParam.getBookid());
+            BookSearchLink bookSearchLink = bookSearchLinkMapper.selectOne(queryWrapper2);
+            // 更改书籍状态
+            UpdateWrapper<BookSearchLink> updateWrapper1 = new UpdateWrapper<>();
+            updateWrapper1.set("bookstate","空闲");
+            updateWrapper1.eq("bookid",returnBookParam.getBookid());
+            if(bookSearchLinkMapper.update(null,updateWrapper1)==0){
+                return r.error("503","unknown error02");
+            }
+            // 更改书籍均分以及当前剩余数量
+            UpdateWrapper<Book> updateWrapper2 = new UpdateWrapper<>();
+            updateWrapper2.set("averagescore",score);
+            updateWrapper2.setSql("bookremainder = bookremainder + 1");
+            updateWrapper2.eq("booksearchid",bookSearchLink.getBooksearchid());
+            if(bookMapper.update(null,updateWrapper2)==0){
+                return r.error("503","unknown error03");
+            }
+            return r.ok();
+        }
+        else{
+            return r.error("404","记录不存在");
+        }
+    }
+
+    @Override
+    public R searchBookList(String searchItem,String itemInfo){
+        R r=new R();
+        if(searchItem == null || itemInfo == null)
+            return r.error("404","缺少搜索信息");
+        QueryWrapper<Book> queryWrapper = new QueryWrapper<>();
+        if(searchItem.equals("author")){
+            queryWrapper.eq("author",itemInfo);
+        }else if(searchItem.equals("bookname")){
+            queryWrapper.eq("bookname",itemInfo);
+        }else if(searchItem.equals("booksearchid")){
+            queryWrapper.eq("booksearchid",itemInfo);
+        }else if(searchItem.equals("press")){
+            queryWrapper.eq("press",itemInfo);
+        }
+        else {
+            return r.error("404","搜索信息不存在");
+        }
+        List<Book> books = bookMapper.selectList(queryWrapper);
+        return r.ok().data("bookList",books);
+    }
+
+    @Override
+    public R getBookComment(String bookSearchId){
+        R r = new R();
+        // 获取对应索书号的藏书号
+        QueryWrapper<BookSearchLink> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("booksearchid",bookSearchId);
+        queryWrapper.select("bookid");
+        List<BookSearchLink> bookids = bookSearchLinkMapper.selectList(queryWrapper);
+        if(bookids.size()==0)
+            return r.error("404","图书不存在");
+        // 查找评论
+        QueryWrapper<Borrow> queryWrapper1 = new QueryWrapper<>();
+        queryWrapper1.select("loantime","score","evaluatetext");
+        queryWrapper1.isNotNull("returntime");
+        for(int i = 0; i< bookids.size(); i++){
+            queryWrapper1.eq("bookid",bookids.get(i).getBookid()).or();
+        }
+        List<Borrow> borrows = borrowMapper.selectList(queryWrapper1);
+        return r.ok().data("bookComments",borrows);
+    }
+
+
+    @Override
+    public R getBorrow(String id){
+        R r = new R();
+        QueryWrapper<Borrow> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("userid",id);
+        queryWrapper.isNull("returntime");
+        List<Borrow> borrows = borrowMapper.selectList(queryWrapper);
+        return r.ok().data("borrow",borrows);
+    }
+
+    public R getBorrowHis(String id){
+        R r = new R();
+        QueryWrapper<Borrow> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("userid",id);
+        queryWrapper.isNotNull("returntime");
+        List<Borrow> borrows = borrowMapper.selectList(queryWrapper);
+        return r.ok().data("borrowHis",borrows);
     }
 }
