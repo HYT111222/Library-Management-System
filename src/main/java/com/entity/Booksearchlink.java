@@ -7,7 +7,7 @@ import javax.persistence.Id;
 
 @Getter
 @Setter
-public class BookSearchLink {
+public class Booksearchlink {
     @Id
     private String bookid;
     private String booksearchid;

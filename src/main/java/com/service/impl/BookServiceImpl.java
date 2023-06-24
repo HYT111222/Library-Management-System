@@ -3,9 +3,9 @@ package com.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.entity.Book;
-import com.entity.BookSearchLink;
+import com.entity.Booksearchlink;
 import com.mapper.BookMapper;
-import com.mapper.BookSearchLinkMapper;
+import com.mapper.BooksearchlinkMapper;
 import com.service.BookService;
 import com.vo.R;
 import com.vo.param.BorrowParam;
@@ -22,7 +22,7 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
     @Autowired
     private final BookMapper bookMapper;
     @Autowired
-    private final BookSearchLinkMapper bookSearchLinkMapper;
+    private final BooksearchlinkMapper bookSearchLinkMapper;
 
     // 获取所有图书列表
     @Override
@@ -87,9 +87,9 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
         System.out.println("借阅图书开始执行");
         R r = new R();
         // 根据bookid 获取对应的bookstate
-        QueryWrapper<BookSearchLink> queryWrapper = new QueryWrapper<>();
+        QueryWrapper<Booksearchlink> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("bookid",borrowParam.getBookId());
-        BookSearchLink booksearchlink = bookSearchLinkMapper.selectOne(queryWrapper);
+        Booksearchlink booksearchlink = bookSearchLinkMapper.selectOne(queryWrapper);
         if(booksearchlink.getBookstate() == "已借出"){
             return r.error("该书籍已被借出");
         }
