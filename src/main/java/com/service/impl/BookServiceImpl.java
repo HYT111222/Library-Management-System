@@ -140,6 +140,7 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
         return r;
     }
 
+    // 获取当前时间
     private String getStringDate(){
         Date currentTime = new Date();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
