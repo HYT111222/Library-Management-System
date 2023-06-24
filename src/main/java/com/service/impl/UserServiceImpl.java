@@ -26,12 +26,10 @@ import com.util.md5;
  * Date: 2023/04/13
  */
 @Service
-//@Transactional
 @AllArgsConstructor
 public class UserServiceImpl  extends ServiceImpl<UserMapper, User> implements UserService {
     @Autowired
     private final UserMapper userMapper;
-
 
     /**
      *
@@ -48,6 +46,8 @@ public class UserServiceImpl  extends ServiceImpl<UserMapper, User> implements U
            String salt = user.getSalt();
            String afterMd5 = md5.code(loginParam.getPassword(),salt);
            if (Objects.equals(afterMd5, user.getPassword())) {
+               String token =user.getToken(user);
+               r.data("token",token);
                return r.ok();
            } else {
               return r.error("密码错误");
@@ -98,10 +98,29 @@ public class UserServiceImpl  extends ServiceImpl<UserMapper, User> implements U
     }
 
     @Override
+    public  R modifyPassword(String newpassword,String id){
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("userid", id);
+        R r = new R();
+        User user = userMapper.selectById(id);
+        if (user == null) {
+            r.error("用户不存在");
+            return r;
+        }
+        String md5_password = md5.code(newpassword,user.getSalt());
+        userMapper.updatePassword(md5_password,id);
+        r.ok();
+        return r;
+    }
+
+
+    @Override
     public User findUserById(String id) {
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("userid", id);
         User user = userMapper.selectOne(queryWrapper);
         return user;
     }
+
+
 }

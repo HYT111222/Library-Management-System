@@ -48,6 +48,16 @@ public class UserController {
 //    @UserLoginToken
 //    public R managerHomePage(@RequestAttribute(value="id") String id)
 //    {
-//        return userService.managerHomePage(id);
+//        System.out.println(id);
+//        R r= new R();
+//        return r.ok();
 //    }
+
+    @PutMapping("modifypassword")
+    @UserLoginToken
+    public R modifypassword(@RequestParam("newpassword")String newpassword,@RequestAttribute(value="id") String id){
+        return userService.modifyPassword(newpassword,id);
+    }
+
+
 }
