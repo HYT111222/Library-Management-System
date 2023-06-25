@@ -92,6 +92,9 @@ public class BookServiceImpl extends ServiceImpl<BookMapper, Book> implements Bo
         queryWrapper.eq("booksearchid",bookSearchId);
         // 返回
         Book book = bookMapper.selectOne(queryWrapper);
+        if(book == null){
+            return r.error("404","没有该书籍");
+        }
         r.data("bookInfo",book);
         System.out.println("Book: "+String.valueOf(book));
         System.out.println("图书详情查看执行完毕");
