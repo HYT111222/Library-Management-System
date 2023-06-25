@@ -56,7 +56,6 @@ public class BookController {
         return bookService.searchBookList(searchItem,itemInfo);
     }
 
-
     //wxy
     @GetMapping("/getBookComment/{bookSearchId}")
     @UserLoginToken

@@ -26,9 +26,14 @@ public class LibraryServiceImpl extends ServiceImpl<LibraryMapper, Library> impl
         QueryWrapper<Library> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("libraryid",libraryId);
         Library library = libraryMapper.selectOne(queryWrapper);
+        if(library == null){
+            System.out.println("图书馆为空");
+            return r.error("404","没有该图书馆");
+        }
         r.data("data",library);
         System.out.println("图书馆信息： " + library);
         System.out.println("查看图书馆信息执行完毕");
+        r.setCode("200");
         return r.ok();
     }
 }
